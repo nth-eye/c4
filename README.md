@@ -1,8 +1,8 @@
 ## Connect4-Cpp
 Connect4 game environment which uses bitboards.
 
-# BOARD REPRESENTATION:	
-
+### Board representation	
+'''
 			+-------------------+
 			| 0 0 0 0 0 0 0 0 1 | <-- 63 bit
 	row 5	| 1 1 1 1 1 1 1 0 0 |
@@ -16,6 +16,6 @@ Connect4 game environment which uses bitboards.
 			0 bit	   42 bit
 
 	Last bit represents current player. 0x0 is X and 0x8000000000000000 is O.
-
-# Interface
+'''
+### Interface
 ![alt text](img/img.jpg "Interface")
