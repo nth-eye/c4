@@ -47,25 +47,25 @@ class Game {
     uint64_t current = 0;
     std::vector<State> history;
 public:
-	static constexpr Action NO_MOVE = 7;
+    static constexpr Action NO_MOVE = 7;
 
-	Game() { history.emplace_back(all, current); }
-	Game(uint64_t all_, uint64_t current_) : all(all_), current(current_) { history.emplace_back(all, current); }
+    Game() { history.emplace_back(all, current); }
+    Game(uint64_t all_, uint64_t current_) : all(all_), current(current_) { history.emplace_back(all, current); }
 
-	void reset();
-	void test();
+    void reset();
+    void test();
 
-	uint64_t result() const;
+    uint64_t result() const;
     uint64_t to_play() const    { return current & TURN; }
-	bool terminal() const       { return result() != EMPTY; }
-	bool legal(Action move) const;
-	float reward() const;
-	float act(Action move);
+    bool terminal() const       { return result() != EMPTY; }
+    bool legal(Action move) const;
+    float reward() const;
+    float act(Action move);
 
-	Action ask_input() const;
-	ActionList legal_actions() const;
+    Action ask_input() const;
+    ActionList legal_actions() const;
 
-	std::string str() const;
+    std::string str() const;
 };
 
 }
