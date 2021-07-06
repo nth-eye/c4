@@ -2,7 +2,7 @@
 
 int main(int, char**) 
 {
-    auto game = c4::Game();
+    C4 game;
 
-    game.test();
+    game.play();
 }

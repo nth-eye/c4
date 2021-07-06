@@ -1,162 +1,148 @@
+#include <cstdio>
+#include <array>
 #include "c4.h"
 
-namespace c4 {
+constexpr Bitboard bit(int i) { return 1ul << i; }
 
-namespace {
-
-constexpr auto generate_bottom_top()
+constexpr bool haswon(Bitboard board)
 {
-    std::array<uint64_t, 7> bottom = {};
-    std::array<uint64_t, 7> top = {};
-
-    for (int i = 0; i < 7; ++i) {
-        bottom[i] = 1ULL << (7*i);
-        top[i] = 1ULL << (5 + 7*i);
-    }
-    return std::make_pair(bottom, top);
-}
-
-// Could use structured bindings if they were constexpr >:|
-constexpr auto pair = generate_bottom_top();
-constexpr auto BOTTOM = pair.first;
-constexpr auto TOP = pair.second;
-
-// Idea taken from https://stackoverflow.com/questions/4261332/optimization-chance-for-following-bit-operations
-// Thanks to Ben Jackson
-bool haswon(uint64_t board)
-{
-    uint64_t y = board & (board >> 6);
-    uint64_t z = board & (board >> 7);
-    uint64_t w = board & (board >> 8);
-    uint64_t x = board & (board >> 1);
+    Bitboard y = board & (board >> 6);
+    Bitboard z = board & (board >> 7);
+    Bitboard w = board & (board >> 8);
+    Bitboard x = board & (board >> 1);
     return  (y & (y >> 2 * 6)) | // check \ diagonal
             (z & (z >> 2 * 7)) | // check - horizontal
             (w & (w >> 2 * 8)) | // check / diagonal
             (x & (x >> 2));      // check | vertical
 }
 
-} // namespace
-
-void Game::reset() 
+template<bool Top>
+constexpr auto generate()
 {
-    history.clear();
-    all = TURN;
-    current = 0;
-    history.emplace_back(all, current);
+    std::array<Bitboard, 7> arr = {};
+
+    for (int i = 0; i < 7; ++i)
+        arr[i] = bit(5 * Top + 7 * i);
+
+    return arr;
 }
 
-void Game::test() 
+constexpr auto BOTTOM   = generate<false>();
+constexpr auto TOP      = generate<true>();
+
+void C4::print() const
 {
-    std::cout << str() << std::endl;
+    puts("\n");
+
+    char p1 = (current & TURN) == X ? 'X' : 'O';
+    char p2 = (current & TURN) == X ? 'O' : 'X';
+    char c;
+
+    for (int row = 5; row >= 0; --row) {
+
+        printf("|");
+
+        for (int col = 0; col < 7; ++col) {
+
+            Bitboard mask = bit(col * 7 + row);
+
+            if (current & mask)
+                c = p1;
+            else if (all & mask)
+                c = p2;
+            else 
+                c = '-';
+
+            printf("%c|", c);
+        }
+        printf("\n");
+    }
+    printf("\n");
+    printf("turn:   %c \n", p1);
+    printf("result: ");
+
+    switch (result()) {
+        case EMPTY:	c = '?';    break;
+        case X:		c = 'X';    break;
+        case O:		c = 'O';    break;
+        case DRAW:	c = '-';    break;
+    }
+    printf("%c \n\n", c);
+}
+
+void C4::play() 
+{
+    print();
 
     while (result() == EMPTY) {
-        std::cout << "\nMake move: " << std::flush;
-        auto move = ask_input();
-        act(move);
-        std::cout << str() << std::endl;
+        Move move = ask_input();
+        make_move(move);
+        print();
     };
 }
 
-uint64_t Game::result() const
+void C4::reset() 
 {
-    // Define player who just made move.
+    all     = TURN;
+    current = 0;
+}
+
+void C4::make_move(Move col)
+{
+    current ^= all;
+    all     |= all + BOTTOM[col];
+}
+
+bool C4::legal(Move col) const 
+{
+    if (col > 6)
+        return false;
+
+    return !(all & TOP[col]);
+}
+
+Bitboard C4::result() const
+{
+    if ((all & BOARD) == BOARD)
+        return DRAW;
+
     auto player = all ^ current;
 
     if (haswon(player))
         return player & TURN;
 
-    if ((all & BOARD) == BOARD)
-        return DRAW;
-
     return EMPTY;
 }
 
-bool Game::legal(Action col) const 
+Move C4::ask_input() const
 {
-    if (col < 0 || col >= 7)
-        return false;
+    long long move = -1;
 
-    return (all & TOP[col]) == 0;
-}
-
-float Game::reward() const
-{
-    switch (result()) {
-        case X:
-        case O: return 1.0f;
-        default: return 0.0f;
-    }
-}
-
-float Game::act(Action col)
-{
-    current ^= all;
-    all |= all + BOTTOM[col];
-
-    history.emplace_back(all, current);
-
-    return reward();
-}
-
-Action Game::ask_input() const
-{
-    Action move = NO_MOVE;
     while (true) {
-        std::cin >> move;
-        if (std::cin.fail()) {
-            std::cin.clear();
-            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-            std::cout << "\nIncorrect input\n" << std::endl;
+
+        printf("\nMake move: ");
+
+        int result = scanf("%lld", &move);
+
+        if (result == EOF || !result) {
+            puts("\nIncorrect input");
         } else if (!legal(move)) {
-            std::cout << "\nIllegal move\n" << std::endl;
+            puts("\nIllegal move");
         } else {
             break;
         }
+        while (fgetc(stdin) != '\n');
     };
     return move;
 }
 
-ActionList Game::legal_actions() const
+MoveList C4::moves() const
 {
-    ActionList moves;
+    MoveList moves;
 
     for (int i = 0; i < 7; ++i)
         if (!(all & TOP[i]))
-            moves.push_back(i);
+            moves.save(i);
 
     return moves;
-}
-
-std::string Game::str() const
-{
-    std::stringstream ss;
-    ss << '\n';
-
-    char p1 = (current & TURN) == X ? 'X' : 'O';
-    char p2 = p1 == 'X' ? 'O' : 'X';
-
-    for (int row = 5; row >= 0; --row) {
-        ss << '|';
-        for (int col = 0; col < 7; ++col) {
-            auto mask = (1ULL << (col*7 + row));
-            if (current & mask)
-                ss << p1;
-            else if (all & mask)
-                ss << p2;
-            else 
-                ss << '-';
-            ss << '|';
-        }
-        ss << '\n';
-    }
-    ss << "\nturn:\t" << p1 << "\nwinner:\t";
-    switch (result()) {
-        case EMPTY:	ss << '-'; break;
-        case X:		ss << 'X'; break;
-        case O:		ss << 'O'; break;
-        case DRAW:	ss << "draw"; break;
-    }
-    return ss.str();
-}
-
 }
