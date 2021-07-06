@@ -31,7 +31,7 @@ struct C4 {
     void make_move(Move move);
     bool legal(Move move) const;
 
-    int turn() const    { return current & TURN; }
+    Bitboard turn() const    { return current & TURN; }
     Bitboard result() const;
 
     Move ask_input() const;
