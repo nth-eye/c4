@@ -103,13 +103,13 @@ bool C4::legal(Move col) const
 
 Bitboard C4::result() const
 {
-    if ((all & BOARD) == BOARD)
-        return DRAW;
-
     auto player = all ^ current;
 
     if (haswon(player))
         return player & TURN;
+
+    if ((all & BOARD) == BOARD)
+        return DRAW;
 
     return EMPTY;
 }
