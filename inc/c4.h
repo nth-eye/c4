@@ -41,4 +41,4 @@ private:
     Bitboard current    = 0;
 };
 
-#endif // C4_H
+#endif
