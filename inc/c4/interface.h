@@ -1,4 +1,4 @@
-#ifndef C4INTERFACE_H
+#ifndef C4_INTERFACE_H
 #define C4_INTERFACE_H
 
 #include "c4/engine.h"
