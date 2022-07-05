@@ -1,7 +1,6 @@
-# Connect4-cpp
+# c4
 
-Minimalistic Connect4 C++11 game environment which uses bitboards and as little resources as possible. By rewriting ask_input() and print() functions the engine 
-can be integrated in any specific environment and device.
+Minimalistic Connect4 C++20 game environment which uses as little resources as possible with the help of bitboards. By rewriting `input()` and `print()` functions in `Interface`, the engine can be integrated in any specific environment and device.
 
 ## Board representation
 
@@ -24,10 +23,7 @@ Last bit represents current player. 0x0 is X and 0x8000000000000000 is O.
 ## How to use
 
 ```cpp
-C4 game;
-game.play();
+#include "c4/interface.h"
+...
+c4::Interface{}.play();
 ```
-
-## TODO
-
-**_Nothing_**

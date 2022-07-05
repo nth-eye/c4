@@ -1,13 +1,10 @@
 cmake_minimum_required(VERSION 3.0.0)
 project(c4 VERSION 0.1.0)
 
-include_directories(inc)
+add_library(libc4 INTERFACE)
+target_include_directories(libc4 INTERFACE inc)
+target_compile_features(libc4 INTERFACE cxx_std_20)
 
-add_executable(c4 main.cpp src/c4.cpp)
-
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wpedantic -03")
-set(CPACK_PROJECT_NAME ${PROJECT_NAME})
-set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
-include(CPack)
+add_executable(c4 main.cpp)
+target_compile_features(c4 PRIVATE cxx_std_20)
+target_link_libraries(c4 PRIVATE libc4)

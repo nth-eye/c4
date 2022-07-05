@@ -1,8 +1,6 @@
-#include "c4.h"
+#include "c4/interface.h"
 
 int main(int, char**) 
 {
-    C4 game;
-
-    game.play();
+    c4::Interface{}.play();
 }
